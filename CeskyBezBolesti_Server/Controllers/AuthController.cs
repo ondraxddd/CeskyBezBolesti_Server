@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Data.SQLite;
 using System.IdentityModel.Tokens.Jwt;
@@ -122,8 +123,8 @@ namespace CeskyBezBolesti_Server.Controllers
             }
         }
 
-        [HttpPost("/getuser")]
-        public async Task<ActionResult<string>> GetUser(string token)
+        [HttpGet("/getuser")]
+        public async Task<ActionResult<string>> GetUser()
         {
             string? token2 = HttpContext.Request.Cookies["jwtToken"];
 
@@ -146,7 +147,7 @@ namespace CeskyBezBolesti_Server.Controllers
                 };
 
                 SecurityToken validatedToken;
-                var principal = tokenHandler.ValidateToken(token, validationParameters, out validatedToken);
+                var principal = tokenHandler.ValidateToken(token2, validationParameters, out validatedToken);
 
                 // Extrahování informací o uživateli z Claims
                 var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -175,6 +176,7 @@ namespace CeskyBezBolesti_Server.Controllers
             }
         }
 
+
         [HttpGet("isjwtincluded")]
         public IActionResult IsJwtIncuded()
         {
@@ -197,7 +199,7 @@ namespace CeskyBezBolesti_Server.Controllers
         [HttpGet("/ping")]
         public void Ping()
         {
-            Response.Headers.SetCookie = "test=ahoj; httpOnly=true; secure; samesite=none; path=/";
+            Response.Headers.SetCookie = "jwtToken=ahoj; httpOnly=true; secure; samesite=none; path=/";
             Response.StatusCode = 200;
         }
         private string CreateToken(User user)
