@@ -2,7 +2,11 @@
 using CeskyBezBolesti_Server.DTO;
 using CeskyBezBolesti_Server.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace CeskyBezBolesti_Server.Controllers
 {
@@ -11,6 +15,7 @@ namespace CeskyBezBolesti_Server.Controllers
     public class GeneralController : ControllerBase
     {
         IDatabaseManager db = MyContainer.GetDbManager();
+        private static readonly IConfiguration _configuration;
 
         [HttpGet("getcategories")]
         public async Task<ActionResult<string>> GetCategories()
@@ -32,7 +37,7 @@ namespace CeskyBezBolesti_Server.Controllers
                 categories.Add(tempCatg);
             }
             result.Close();
-            result.DisposeAsync();
+            await result.DisposeAsync();
 
             string getSubctgs = "SELECT id, catg_id, desc FROM subcategories";
             result = db.RunQuery(getSubctgs);
@@ -70,5 +75,7 @@ namespace CeskyBezBolesti_Server.Controllers
             return JsonConvert.SerializeObject(categories);
             
         }
+
+        
     }
 }

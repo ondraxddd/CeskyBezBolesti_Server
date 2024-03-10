@@ -176,7 +176,6 @@ namespace CeskyBezBolesti_Server.Controllers
             }
         }
 
-
         [HttpGet("isjwtincluded")]
         public IActionResult IsJwtIncuded()
         {

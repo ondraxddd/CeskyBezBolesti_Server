@@ -1,3 +1,4 @@
+using CeskyBezBolesti_Server;
 using CeskyBezBolesti_Server.Database;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 string connectionString = "YourSQLiteConnectionString";
 builder.Services.AddSingleton<IDatabaseManager>(provider => new SqliteDbManager(connectionString));
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
+GeneralFunctions.Initialize(builder.Configuration);
 
 // Adding CORS
 builder.Services.AddCors(options =>
