@@ -33,9 +33,11 @@ if (app.Environment.IsDevelopment())
 }
 
 
-app.UseCors("default");
 
 app.UseHttpsRedirection();
+
+app.UseCors("default");
+
 
 app.UseAuthorization();
 

@@ -12,7 +12,7 @@ namespace CeskyBezBolesti_Server.Controllers
     public class QuestionsController : ControllerBase
     {
         IDatabaseManager db = MyContainer.GetDbManager();
-        int limit = 10;
+        int limit = 8;
 
         [HttpPost("getset")]
         public async Task<ActionResult<string>> GetSet(QuestionRequestDto request)
@@ -37,25 +37,50 @@ namespace CeskyBezBolesti_Server.Controllers
                 questIndex++;
             }
 
-
-            // get the correct answer
-            foreach (var question in questions)
+            // get correct answer
+            for(int i = 0; i < questions.Count(); i++)
             {
-                // doesnt want to select correct answer, fix it
-                command = "SELECT text FROM answers WHERE isCorrect = 'True'";
+                if (questions[i] is null) continue;
+                command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
+                    $" AND isCorrect == 1";
                 reader = db.RunQuery(command);
                 if (!reader.HasRows) continue;
-                question.CorrectAnswer = reader[0].ToString()!;
+                reader.Read();
+                questions[i].CorrectAnswer = reader[0].ToString();
             }
 
             //get the false answer
+            for (int i = 0; i < questions.Count(); i++)
+            {
+                if (questions[i] is null) continue;
+                command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
+                    $" AND isCorrect == 0";
+                reader = db.RunQuery(command);
+                if (!reader.HasRows) continue;
+                reader.Read();
+                questions[i].FalseAnswer = reader[0].ToString();
+            }
 
-
+            reader.Close();
             await reader.DisposeAsync();
             QuestionResponseDto response = new QuestionResponseDto() {
                 Questions = questions
             };
             return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost("recordmistake")]
+        public async Task<ActionResult<string>> RecordMistake(int questId)
+        {
+            string? token = HttpContext.Request.Cookies["jwtToken"];
+            if (token == null) return BadRequest("Jwt Token Not Found!");
+            User user = await GeneralFunctions.GetUser(token);
+            //record to db
+            string command = $"INSERT OR IGNORE INTO recorded_answers(user_id, quest_id, wasCorrect) VALUES({user.Id}, {questId}, 0)";
+
+            await db.RunNonQueryAsync(command);
+
+            return Ok();
         }
     }
 }

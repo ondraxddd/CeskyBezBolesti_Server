@@ -1,4 +1,5 @@
 ﻿using CeskyBezBolesti_Server.DTO;
+using CeskyBezBolesti_Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -16,7 +17,7 @@ namespace CeskyBezBolesti_Server
             _configuration = config;
         }
 
-        public static async Task<UserDto> GetUser(string token)
+        public static async Task<User> GetUser(string token)
         {
 
             try
@@ -50,7 +51,7 @@ namespace CeskyBezBolesti_Server
                 var lastName = principal.FindFirst(ClaimTypes.Surname)?.Value;
 
                 // Vytvoření a naplnění instance UserDto
-                var userDto = new UserDto
+                var userDto = new User
                 {
                     Id = userId!,
                     Username = username!,

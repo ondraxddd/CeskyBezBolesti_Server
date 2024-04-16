@@ -2,6 +2,6 @@
 {
     public class QuestionRequestDto
     {
-        public string SubCatgId { get; set; }
+        public int SubCatgId { get; set; }
     }
 }

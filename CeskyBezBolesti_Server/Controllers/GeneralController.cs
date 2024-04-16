@@ -17,10 +17,11 @@ namespace CeskyBezBolesti_Server.Controllers
         IDatabaseManager db = MyContainer.GetDbManager();
         private static readonly IConfiguration _configuration;
 
-        [HttpGet("getcategories")]
-        public async Task<ActionResult<string>> GetCategories()
+        // vrátí kategorie i podkategorie
+        [HttpGet("getallcategories")]
+        public async Task<ActionResult<string>> GetAllCategories()
         {
-            string getCtgs = "SELECT id, title FROM categories";
+            string getCtgs = "SELECT id, subject_id, title FROM categories";
             var result = db.RunQuery(getCtgs);
             if (!result.HasRows)
                 return BadRequest(JsonConvert.SerializeObject("No categories were loaded!"));
@@ -31,6 +32,7 @@ namespace CeskyBezBolesti_Server.Controllers
                 Category tempCatg = new Category()
                 {
                     Id = int.Parse(result["id"].ToString()!),
+                    SubjectId = int.Parse(result["subject_id"].ToString()!),
                     Title = result["title"].ToString()!,
                    // Desc = result["desc"].ToString(),
                 };
@@ -76,6 +78,122 @@ namespace CeskyBezBolesti_Server.Controllers
             
         }
 
-        
+        // vráti subjekty
+        [HttpGet("getsubjects")]
+        public async Task<ActionResult<string>> GetSubjects()
+        {
+            string getCtgs = "SELECT id, title FROM Subjects";
+            var result = db.RunQuery(getCtgs);
+            if (!result.HasRows)
+                return BadRequest(JsonConvert.SerializeObject("No subjects were loaded!"));
+
+            List<Subject> subjects = new List<Subject>();
+            foreach (var res in result)
+            {
+                Subject tempSub = new Subject()
+                {
+                    Id = int.Parse(result["id"].ToString()!),
+                    Title = result["title"].ToString()!,
+                };
+                subjects.Add(tempSub);
+            }
+            result.Close();
+            await result.DisposeAsync();
+
+            return JsonConvert.SerializeObject(subjects);
+
+        }
+
+        // vrátí subjekty i s jejich kategoriemi i podkategoriemi
+        [HttpGet("getallsubjects")]
+        public async Task<ActionResult<string>> GetAllSubjects()
+        {
+            // get subjects
+            string command = "SELECT id, title FROM Subjects";
+            var reader = db.RunQuery(command);
+            if (!reader.HasRows)
+                return BadRequest(JsonConvert.SerializeObject("No subjects were loaded!"));
+
+            List<FullSubjectsResponse> subjects = new List<FullSubjectsResponse>();
+            foreach (var res in reader)
+            {
+                FullSubjectsResponse tempSub = new FullSubjectsResponse()
+                {
+                    Id = int.Parse(reader["id"].ToString()!),
+                    Title = reader["title"].ToString()!,
+                };
+                subjects.Add(tempSub);
+            }
+
+            // get categories per each subject
+            foreach(var subject in subjects)
+            {
+                command = $"SELECT * FROM categories WHERE subject_id = {subject.Id}";
+                reader = db.RunQuery(command);
+                subject.Categories = new List<Category>();
+                foreach(var catg in reader)
+                {
+                    Category tempCatg = new Category()
+                    {
+                        Id = int.Parse(reader["id"].ToString()!),
+                        Title = reader["title"].ToString()!,
+                        Desc = reader["desc"].ToString()!,
+                    };
+
+                    // find all its subcategories per category
+                    string subCatgsCommand = $"SELECT * FROM subcategories WHERE catg_id = {tempCatg.Id}";
+                    var subCatgReader = db.RunQuery(subCatgsCommand);
+                    tempCatg.SubCatgs = new List<Subcategory>();
+                    foreach(var subCatg in subCatgReader)
+                    {
+                        Subcategory tempSubcatg = new Subcategory()
+                        {
+                            Id = int.Parse(subCatgReader["id"].ToString()),
+                            Desc = subCatgReader["desc"].ToString()!
+                        };
+                        tempCatg.SubCatgs.Add(tempSubcatg);
+                    }
+
+                    subject.Categories.Add(tempCatg);
+                }
+            }
+
+
+            reader.Close();
+            await reader.DisposeAsync();
+
+            return JsonConvert.SerializeObject(subjects);
+        }
+
+        [HttpGet("getsubcategorydetails")]
+        public async Task<ActionResult<string>> GetSubcategoryDetails(int subCatgId)
+        {
+            // get details about subcategory
+            string command = $"SELECT * FROM subcategories WHERE id = {subCatgId}";
+            var reader = db.RunQuery(command);
+            if (!reader.HasRows)
+                return BadRequest(JsonConvert.SerializeObject("No subjects were loaded!"));
+
+            
+            SubcategoryDTO subCategory = new SubcategoryDTO();
+            foreach (var res in reader)
+            {
+                subCategory.Id = subCatgId;
+                subCategory.ParentCatgId = int.Parse(reader["catg_id"].ToString()!);
+                subCategory.Desc = reader["desc"].ToString()!;
+            }
+
+            // get parent category name
+            command = $"SELECT title FROM categories WHERE id = {subCategory.ParentCatgId}";
+            reader = db.RunQuery(command);
+            reader.Read();
+            subCategory.ParentCatgName = reader["title"].ToString()!;
+
+
+            reader.Close();
+            await reader.DisposeAsync();
+
+            return JsonConvert.SerializeObject(subCategory);
+        }
     }
 }

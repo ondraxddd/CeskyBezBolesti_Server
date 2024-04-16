@@ -70,10 +70,12 @@ namespace CeskyBezBolesti_Server.Controllers
             string dbSalt = (string)result["password_salt"];
             User tempUser = new User()
             {
+                Id = result["id"].ToString()!,
                 FirstName = (string)result["first_name"],
                 LastName = (string)result["last_name"],
                 Username = (string)result["username"],
                 Email = (string)result["email"]
+                
             };
             result.Close();
             result.DisposeAsync();
@@ -167,7 +169,7 @@ namespace CeskyBezBolesti_Server.Controllers
                     FirstName = firstName,
                     LastName = lastName
                 };
-
+                Response.Headers.SetCookie = new Microsoft.Extensions.Primitives.StringValues($"loggedIn=true;path=/;samesite=none;secure");
                 return Ok(JsonConvert.SerializeObject(userDto));
             }
             catch (Exception ex)
@@ -205,6 +207,7 @@ namespace CeskyBezBolesti_Server.Controllers
         {
             List<Claim> claims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, user.Id!),
                 new Claim(ClaimTypes.GivenName, user.FirstName),
                 new Claim(ClaimTypes.Surname, user.LastName),
                 new Claim(ClaimTypes.Name, user.Username),
