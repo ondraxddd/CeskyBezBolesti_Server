@@ -75,8 +75,9 @@ namespace CeskyBezBolesti_Server.Controllers
             string? token = HttpContext.Request.Cookies["jwtToken"];
             if (token == null) return BadRequest("Jwt Token Not Found!");
             User user = await GeneralFunctions.GetUser(token);
+
             //record to db
-            string command = $"INSERT OR IGNORE INTO recorded_answers(user_id, quest_id, wasCorrect) VALUES({user.Id}, {questId}, 0)";
+            string command = $"";
 
             await db.RunNonQueryAsync(command);
 
