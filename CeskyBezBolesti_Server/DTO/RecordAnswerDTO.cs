@@ -2,6 +2,7 @@
 {
     public class RecordAnswerDTO
     {
-        public string QuestID { get; set; }
+        public int QuestId { get; set; }
+        public bool WasCorrect { get; set; }
     }
 }

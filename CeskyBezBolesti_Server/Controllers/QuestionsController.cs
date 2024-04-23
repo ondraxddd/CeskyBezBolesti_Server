@@ -70,14 +70,34 @@ namespace CeskyBezBolesti_Server.Controllers
         }
 
         [HttpPost("recordmistake")]
-        public async Task<ActionResult<string>> RecordMistake(int questId)
+        public async Task<ActionResult<string>> RecordMistake(RecordAnswerDTO answer)
         {
             string? token = HttpContext.Request.Cookies["jwtToken"];
             if (token == null) return BadRequest("Jwt Token Not Found!");
             User user = await GeneralFunctions.GetUser(token);
 
             //record to db
-            string command = $"";
+            string command = $"SELECT * FROM recorded_answers WHERE user_id={user.Id} AND quest_id={answer.QuestId} AND " +
+                $"wasCorrect={(answer.WasCorrect ? 1 : 0)};";
+            var reader = db.RunQuery(command);
+            int count = 1;
+            //has atleast once answered
+            if(reader.HasRows)
+            {
+                reader.Read();
+                count = int.Parse(reader["count"].ToString()!);
+                count++;
+                command = $"UPDATE recorded_answers SET count = {count} WHERE user_id = {user.Id} AND quest_id = {answer.QuestId}" +
+                    $" AND wasCorrect={(answer.WasCorrect ? 1 : 0)}";
+
+            }
+            else
+            {
+                command = $"INSERT INTO recorded_answers(user_id, quest_id, wasCorrect, count) " +
+                    $"VALUES({user.Id}, {answer.QuestId}, {(answer.WasCorrect ? 1 : 0)}, {count})";
+            }
+            await reader.CloseAsync();
+            await reader.DisposeAsync();
 
             await db.RunNonQueryAsync(command);
 
