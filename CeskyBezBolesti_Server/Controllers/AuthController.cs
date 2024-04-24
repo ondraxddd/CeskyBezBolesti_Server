@@ -53,6 +53,8 @@ namespace CeskyBezBolesti_Server.Controllers
             Email= req.Email,
             };
 
+            await GeneralFunctions.RegisterNewDayOfUsingUs(tempUser.Id!);
+
             return Ok(JsonConvert.SerializeObject(CreateToken(tempUser))); 
         }
 
@@ -87,6 +89,9 @@ namespace CeskyBezBolesti_Server.Controllers
             // Return JWT token
             string token = CreateToken(tempUser);
             Response.Headers.SetCookie = new Microsoft.Extensions.Primitives.StringValues($"jwtToken={token};httponly;path=/;samesite=none;secure");
+
+            await GeneralFunctions.RegisterNewDayOfUsingUs(tempUser.Id!);
+
             return Ok(JsonConvert.SerializeObject(token));
         }
 
@@ -129,53 +134,58 @@ namespace CeskyBezBolesti_Server.Controllers
         public async Task<ActionResult<string>> GetUser()
         {
             string? token2 = HttpContext.Request.Cookies["jwtToken"];
+            if (token2 == null) return BadRequest("Jwt Token not found!");
 
-            try
-            {
-                var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+            //try
+            //{
+            //    var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
 
-                var tokenHandler = new JwtSecurityTokenHandler();
+            //    var tokenHandler = new JwtSecurityTokenHandler();
 
-                // Nastavení validace tokenu
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = key,
-                    ValidateIssuer = false, // Můžete upravit podle potřeby
-                    ValidateAudience = false, // Můžete upravit podle potřeby
-                    RequireExpirationTime = true,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero // Žádná tolerance pro časové odchylky
-                };
+            //    // Nastavení validace tokenu
+            //    var validationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateIssuerSigningKey = true,
+            //        IssuerSigningKey = key,
+            //        ValidateIssuer = false, // Můžete upravit podle potřeby
+            //        ValidateAudience = false, // Můžete upravit podle potřeby
+            //        RequireExpirationTime = true,
+            //        ValidateLifetime = true,
+            //        ClockSkew = TimeSpan.Zero // Žádná tolerance pro časové odchylky
+            //    };
 
-                SecurityToken validatedToken;
-                var principal = tokenHandler.ValidateToken(token2, validationParameters, out validatedToken);
+            //    SecurityToken validatedToken;
+            //    var principal = tokenHandler.ValidateToken(token2, validationParameters, out validatedToken);
 
-                // Extrahování informací o uživateli z Claims
-                var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var username = principal.FindFirst(ClaimTypes.Name)?.Value;
-                var email = principal.FindFirst(ClaimTypes.Email)?.Value;
-                var role = principal.FindFirst(ClaimTypes.Role)?.Value;
-                var firstName = principal.FindFirst(ClaimTypes.GivenName)?.Value;
-                var lastName = principal.FindFirst(ClaimTypes.Surname)?.Value;
+            //    // Extrahování informací o uživateli z Claims
+            //    var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //    var username = principal.FindFirst(ClaimTypes.Name)?.Value;
+            //    var email = principal.FindFirst(ClaimTypes.Email)?.Value;
+            //    var role = principal.FindFirst(ClaimTypes.Role)?.Value;
+            //    var firstName = principal.FindFirst(ClaimTypes.GivenName)?.Value;
+            //    var lastName = principal.FindFirst(ClaimTypes.Surname)?.Value;
 
-                // Vytvoření a naplnění instance UserDto
-                var userDto = new UserDto
-                {
-                    Id = userId,
-                    Username = username,
-                    Email = email,
-                    Role = role,
-                    FirstName = firstName,
-                    LastName = lastName
-                };
-                Response.Headers.SetCookie = new Microsoft.Extensions.Primitives.StringValues($"loggedIn=true;path=/;samesite=none;secure");
-                return Ok(JsonConvert.SerializeObject(userDto));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest("Neplatný token. " + ex.Message);
-            }
+            //    // Vytvoření a naplnění instance UserDto
+            //    var userDto = new UserDto
+            //    {
+            //        Id = userId,
+            //        Username = username,
+            //        Email = email,
+            //        Role = role,
+            //        FirstName = firstName,
+            //        LastName = lastName
+            //    };
+            //    Response.Headers.SetCookie = new Microsoft.Extensions.Primitives.StringValues($"loggedIn=true;path=/;samesite=none;secure");
+            //    await GeneralFunctions.RegisterNewDayOfUsingUs(userDto.Id);
+            //    return Ok(JsonConvert.SerializeObject(userDto));
+            //}
+            //catch (Exception ex)
+            //{
+            //    return BadRequest("Neplatný token. " + ex.Message);
+            //}
+
+            User user = await GeneralFunctions.GetUser(token2);
+            return Ok(JsonConvert.SerializeObject(user));
         }
 
         [HttpGet("isjwtincluded")]

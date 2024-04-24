@@ -18,7 +18,7 @@ namespace CeskyBezBolesti_Server.Controllers
             if (timeData.SesionMinutes < 2) return Ok();
 
             string? token = HttpContext.Request.Cookies["jwtToken"];
-            if (token == null) return BadRequest("Jwt Token Not Found!");
+            if (token == null) return Ok();
             User user = await GeneralFunctions.GetUser(token);
 
             string command = $"SELECT minutes FROM time_spent WHERE user_id={user.Id}";

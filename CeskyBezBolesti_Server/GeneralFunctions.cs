@@ -1,4 +1,5 @@
-﻿using CeskyBezBolesti_Server.DTO;
+﻿using CeskyBezBolesti_Server.Database;
+using CeskyBezBolesti_Server.DTO;
 using CeskyBezBolesti_Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -12,6 +13,8 @@ namespace CeskyBezBolesti_Server
     public static class GeneralFunctions
     {
         private static IConfiguration _configuration;
+
+        private static IDatabaseManager db = MyContainer.GetDbManager();
         public static void Initialize(IConfiguration config)
         {
             _configuration = config;
@@ -61,12 +64,21 @@ namespace CeskyBezBolesti_Server
                     LastName = lastName!
                 };
 
+                await RegisterNewDayOfUsingUs(userDto.Id!);
                 return userDto;
             }
             catch (Exception ex)
             {
                 return null;
             }
+        }
+
+        public static async Task RegisterNewDayOfUsingUs(string userId)
+        {
+            DateTime myDateTime = DateTime.Now;
+            string sqlFormattedDate = myDateTime.ToString("yyyy-MM-dd");
+            string command = $"INSERT OR IGNORE INTO user_day_history(user_id, day) VALUES({userId}, '{sqlFormattedDate}')";
+            await db.RunNonQueryAsync(command);
         }
     }
 }
