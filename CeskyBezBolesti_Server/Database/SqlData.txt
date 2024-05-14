@@ -1,0 +1,52 @@
+CREATE UNIQUE INDEX unique_user_quest_correct_pair 
+ON recorded_answers (user_id, quest_id, wasCorrect);
+
+
+INSERT INTO subjects(title) VALUES('Gramatika');
+INSERT INTO subjects(title) VALUES('Práce s textem');
+INSERT INTO subjects(title) VALUES('Slovní zásoba');
+
+INSERT INTO categories(subject_id, title, desc) VALUES((SELECT id FROM Subjects WHERE title = 'Gramatika'), 'Psaní I/Y', 'Budeme I/Y');
+INSERT INTO categories(subject_id, title, desc) VALUES((SELECT id FROM Subjects WHERE title = 'Gramatika'), 'Psaní ě/je', 'Budeme I/Y');
+INSERT INTO categories(subject_id, title, desc) VALUES((SELECT id FROM Subjects WHERE title = 'Práce s textem'), 'Poznání slov', 'Slovní typy');
+
+INSERT INTO subcategories(catg_id, desc) VALUES((SELECT id FROM categories WHERE title = 'Psaní I/Y'),'Po L');
+INSERT INTO subcategories(catg_id, desc) VALUES((SELECT id FROM categories WHERE title = 'Psaní I/Y'),'Po P');
+
+INSERT INTO question(sub_catg_id, text) VALUES((SELECT id FROM subcategories WHERE desc = 'Po L'), 'L_piny');
+INSERT INTO question(sub_catg_id, text) VALUES((SELECT id FROM subcategories WHERE desc = 'Po L'), 'L_bání');
+INSERT INTO question(sub_catg_id, text) VALUES((SELECT id FROM subcategories WHERE desc = 'Po L'), 'L_kér');
+INSERT INTO question(sub_catg_id, text) VALUES((SELECT id FROM subcategories WHERE desc = 'Po L'), 'L_monáda');
+INSERT INTO question(sub_catg_id, text) VALUES((SELECT id FROM subcategories WHERE desc = 'Po L'), 'L_metka');
+INSERT INTO question(sub_catg_id, text) VALUES((SELECT id FROM subcategories WHERE desc = 'Po L'), 'Ul_tnout');
+INSERT INTO question(sub_catg_id, text) VALUES((SELECT id FROM subcategories WHERE desc = 'Po L'), 'Ul_zat');
+INSERT INTO question(sub_catg_id, text) VALUES((SELECT id FROM subcategories WHERE desc = 'Po L'), 'Vyl_zat');
+
+
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_piny'),'I',True);
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_piny'),'Y',False);
+
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_bání'),'Í',True);
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_bání'),'Ý',False);
+
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_kér'),'i',True);
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_kér'),'y',False);
+
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_monáda'),'i',True);
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_monáda'),'y',False);
+
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_metka'),'i',True);
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'L_metka'),'y',False);
+
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'Ul_tnout'),'í',True);
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'Ul_tnout'),'ý',False);
+
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'Ul_zat'),'i',False);
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'Ul_zat'),'y',True);
+
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'Vyl_zat'),'i',False);
+INSERT INTO answers(quest_id, text, isCorrect) VALUES((SELECT id from question WHERE text = 'Vyl_zat'),'y',True);
+
+
+
+

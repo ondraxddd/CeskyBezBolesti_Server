@@ -80,7 +80,7 @@ namespace CeskyBezBolesti_Server.Controllers
                 
             };
             result.Close();
-            result.DisposeAsync();
+            await result.DisposeAsync();
 
             // Verify password
             bool isPasswordCorrect = VerifyPassword(req.Password, Convert.FromBase64String(dbHash), Convert.FromBase64String(dbSalt));
