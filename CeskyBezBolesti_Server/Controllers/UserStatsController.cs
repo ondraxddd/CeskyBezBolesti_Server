@@ -2,6 +2,7 @@
 using CeskyBezBolesti_Server.DTO;
 using CeskyBezBolesti_Server.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Reflection.Metadata.Ecma335;
 
 namespace CeskyBezBolesti_Server.Controllers
@@ -50,6 +51,7 @@ namespace CeskyBezBolesti_Server.Controllers
             if (token == null) return BadRequest("User not logged in!");
             User user = await GeneralFunctions.GetUser(token);
 
+            UserFullStatsDTO userFullStats = new UserFullStatsDTO();
             // success rate
             string succesRate = string.Empty; // in percentages
             string command = "SELECT round(" +
@@ -59,7 +61,7 @@ namespace CeskyBezBolesti_Server.Controllers
             if (reader.HasRows)
             {
                 reader.Read();
-                succesRate = reader[0].ToString() ?? "Chyba...";
+                userFullStats.SuccessRate = reader[0].ToString() ?? "Chyba...";
             }
 
             // get worst doing category
@@ -86,7 +88,7 @@ namespace CeskyBezBolesti_Server.Controllers
             if (reader.HasRows)
             {
                 reader.Read();
-                worstCategory = reader[0].ToString() ?? "Chyba...";
+                userFullStats.WorstCategory = reader[0].ToString() ?? "Chyba...";
             }
 
             // get best doing category
@@ -113,7 +115,7 @@ namespace CeskyBezBolesti_Server.Controllers
             if (reader.HasRows)
             {
                 reader.Read();
-                bestCategory = reader[0].ToString() ?? "Chyba...";
+                userFullStats.BestCategory = reader[0].ToString() ?? "Chyba...";
             }
 
             // get daily time spent average
@@ -125,11 +127,33 @@ namespace CeskyBezBolesti_Server.Controllers
             if (reader.HasRows)
             {
                 reader.Read();
-                dailyAvg = reader[0].ToString() ?? string.Empty;
+                userFullStats.DailyAvg = reader[0].ToString() ?? string.Empty;
             }
 
-
-            return Ok();
+            // get what was wrong the most time ( Už by sis měl pamatovat....)
+            command = "SELECT q.id AS question_id, q.text AS question_text, ra.count, a.text AS correct_answer " +
+                "FROM recorded_answers ra " +
+                "JOIN " +
+                "question q ON ra.quest_id = q.id " +
+                "JOIN " +
+                "answers a ON q.id = a.quest_id AND a.isCorrect = 1 " +
+                "WHERE " +
+                $"ra.user_id = {user.Id} AND ra.wasCorrect = 0 " +
+                "ORDER BY ra.count DESC " +
+                "LIMIT 5;";
+            reader = db.RunQuery(command);
+            if (reader.HasRows)
+            {
+                //reader.Read();
+                foreach(var item in reader)
+                {
+                    Dictionary<string, string> newItem = new Dictionary<string, string>();
+                    newItem.Add(reader["question_text"].ToString() ?? "", reader["correct_answer"].ToString() ?? "");
+                    userFullStats.ShouldRemember.Add(newItem);
+                    //reader["question_text"].ToString(), reader["correct_answer"].ToString()
+                }
+            }
+            return Ok(JsonConvert.SerializeObject(userFullStats));
         }
     }
 }

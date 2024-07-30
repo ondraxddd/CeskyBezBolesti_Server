@@ -29,10 +29,8 @@ namespace CeskyBezBolesti_Server.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> RegisterUser(UserDto req)
+        public async Task<ActionResult<User>> RegisterUser(RegisterUserDTO req)
         {
-            //TODO Defened against the SQL injection!!!!!!!
-
             // Check if user exists
             string loadRecords = $"SELECT id FROM users WHERE email = '{req.Email}'";
             if (db.RunQuery(loadRecords).HasRows)
@@ -46,11 +44,22 @@ namespace CeskyBezBolesti_Server.Controllers
                 $" VALUES('{req.Username}', '{req.LastName}', '{req.FirstName}', '{req.Email}', '{Convert.ToBase64String(passwordHash)}', '{Convert.ToBase64String(passwordSalt)}', '{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}')";
             db.RunNonQuery(saveUserCommand);
 
+            // Get id of new user
+            string getIdCommand = $"SELECT id FROM users WHERE email='{req.Email}' AND username='{req.Username}'";
+            var reader = db.RunQuery(getIdCommand);
+            string userId = string.Empty;
+            if (reader.HasRows)
+            {
+                reader.Read();
+                userId = reader[0].ToString() ?? string.Empty;
+            }
+
             User tempUser = new User() { 
             FirstName = req.FirstName,
             LastName = req.LastName,
             Username= req.Username,
             Email= req.Email,
+            Id = userId,
             };
 
             await GeneralFunctions.RegisterNewDayOfUsingUs(tempUser.Id!);
@@ -135,54 +144,6 @@ namespace CeskyBezBolesti_Server.Controllers
         {
             string? token2 = HttpContext.Request.Cookies["jwtToken"];
             if (token2 == null) return BadRequest("Jwt Token not found!");
-
-            //try
-            //{
-            //    var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
-
-            //    var tokenHandler = new JwtSecurityTokenHandler();
-
-            //    // Nastavení validace tokenu
-            //    var validationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = key,
-            //        ValidateIssuer = false, // Můžete upravit podle potřeby
-            //        ValidateAudience = false, // Můžete upravit podle potřeby
-            //        RequireExpirationTime = true,
-            //        ValidateLifetime = true,
-            //        ClockSkew = TimeSpan.Zero // Žádná tolerance pro časové odchylky
-            //    };
-
-            //    SecurityToken validatedToken;
-            //    var principal = tokenHandler.ValidateToken(token2, validationParameters, out validatedToken);
-
-            //    // Extrahování informací o uživateli z Claims
-            //    var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            //    var username = principal.FindFirst(ClaimTypes.Name)?.Value;
-            //    var email = principal.FindFirst(ClaimTypes.Email)?.Value;
-            //    var role = principal.FindFirst(ClaimTypes.Role)?.Value;
-            //    var firstName = principal.FindFirst(ClaimTypes.GivenName)?.Value;
-            //    var lastName = principal.FindFirst(ClaimTypes.Surname)?.Value;
-
-            //    // Vytvoření a naplnění instance UserDto
-            //    var userDto = new UserDto
-            //    {
-            //        Id = userId,
-            //        Username = username,
-            //        Email = email,
-            //        Role = role,
-            //        FirstName = firstName,
-            //        LastName = lastName
-            //    };
-            //    Response.Headers.SetCookie = new Microsoft.Extensions.Primitives.StringValues($"loggedIn=true;path=/;samesite=none;secure");
-            //    await GeneralFunctions.RegisterNewDayOfUsingUs(userDto.Id);
-            //    return Ok(JsonConvert.SerializeObject(userDto));
-            //}
-            //catch (Exception ex)
-            //{
-            //    return BadRequest("Neplatný token. " + ex.Message);
-            //}
 
             User user = await GeneralFunctions.GetUser(token2);
             return Ok(JsonConvert.SerializeObject(user));
