@@ -73,6 +73,12 @@ namespace CeskyBezBolesti_Server
             }
         }
 
+        public static async Task<bool> CheckAdmin(string token)
+        {
+            // asi by stačilo si získat usera a na tom udělat check
+            throw new NotImplementedException();
+        }
+
         public static async Task RegisterNewDayOfUsingUs(string userId)
         {
             DateTime myDateTime = DateTime.Now;

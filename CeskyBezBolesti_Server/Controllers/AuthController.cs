@@ -85,8 +85,9 @@ namespace CeskyBezBolesti_Server.Controllers
                 FirstName = (string)result["first_name"],
                 LastName = (string)result["last_name"],
                 Username = (string)result["username"],
-                Email = (string)result["email"]
-                
+                Email = (string)result["email"],
+                Role = (string)result["role"]
+
             };
             result.Close();
             await result.DisposeAsync();
@@ -149,6 +150,16 @@ namespace CeskyBezBolesti_Server.Controllers
             return Ok(JsonConvert.SerializeObject(user));
         }
 
+        [HttpGet("/checkifadmin")]
+        public async Task<ActionResult<bool>> CheckIfAdmin()
+        {
+            string? token2 = HttpContext.Request.Cookies["jwtToken"];
+            if (token2 == null) return BadRequest("Jwt Token not found!");
+
+            User user = await GeneralFunctions.GetUser(token2);
+            return Ok(user.Role == "admin" ? true : false);
+        }
+
         [HttpGet("isjwtincluded")]
         public IActionResult IsJwtIncuded()
         {
@@ -182,7 +193,7 @@ namespace CeskyBezBolesti_Server.Controllers
                 new Claim(ClaimTypes.GivenName, user.FirstName),
                 new Claim(ClaimTypes.Surname, user.LastName),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role is null ? "Student" : user.Role),
+                new Claim(ClaimTypes.Role, user.Role is null ? "student" : user.Role),
                 new Claim(ClaimTypes.Email, user.Email)
             };
            var key = new SymmetricSecurityKey(System.Text.
