@@ -103,5 +103,64 @@ namespace CeskyBezBolesti_Server.Controllers
 
             return Ok();
         }
+
+        [HttpPost("addquestion")]
+        public async Task<ActionResult> AddQuestion(QuestionAddDTO newQuestion)
+        {
+            // check if jwt token is valid
+            string? token = HttpContext.Request.Cookies["jwtToken"];
+            if (token == null) return BadRequest("Jwt Token Not Found!");
+
+            if (!GeneralFunctions.IsJwtValid(token))
+            {
+                return BadRequest("Jwt token not valid!");
+            }
+
+            // check if he is admin
+            User user = await GeneralFunctions.GetUser(token);
+            if (user.Role != "admin")
+            {
+                return BadRequest("You must be admin!");
+            }
+
+            // check if the question doesnt exits
+
+            // record the answer
+            string command = $"INSERT INTO question(sub_catg_id, text) VALUES({newQuestion.SubCatgId}," +
+                $" '{newQuestion.QuestText}')";
+            await db.RunNonQueryAsync(command);
+
+            // get id of the newly added question
+            int questId;
+            command = "SELECT id FROM question" +
+                $" WHERE sub_catg_id={newQuestion.SubCatgId} AND " +
+                $" text='{newQuestion.QuestText}'";
+
+            var reader = db.RunQuery(command);
+            if (reader.HasRows)
+            {
+                await reader.ReadAsync();
+                questId = int.Parse(reader["id"].ToString()!);
+            }
+            else
+            {
+                return BadRequest("Addidng question has failed.");
+            }
+
+            // save correct answer
+            command = "INSERT INTO answers(quest_id, text, isCorrect)" +
+                $"VALUES({questId}, '{newQuestion!.Answers![0]}', 1)";
+            await db.RunNonQueryAsync(command);
+
+            // save all the wrong ones
+            for(int i = 1; i < newQuestion.Answers.Length; i++)
+            {
+                command = "INSERT INTO answers(quest_id, text, isCorrect)" +
+                $"VALUES({questId}, '{newQuestion!.Answers![i]}', 0)";
+                await db.RunNonQueryAsync(command);
+            }
+
+            return Ok();
+        }
     }
 }

@@ -185,6 +185,7 @@ namespace CeskyBezBolesti_Server.Controllers
             Response.Headers.SetCookie = "jwtToken=ahoj; httpOnly=true; secure; samesite=none; path=/";
             Response.StatusCode = 200;
         }
+
         private string CreateToken(User user)
         {
             List<Claim> claims = new List<Claim>

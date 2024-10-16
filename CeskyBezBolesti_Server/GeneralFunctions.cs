@@ -79,6 +79,37 @@ namespace CeskyBezBolesti_Server
             throw new NotImplementedException();
         }
 
+        public static bool IsJwtValid(string token)
+        {
+            try
+            {
+                var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                // Nastavení validace tokenu
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateIssuer = false, // Můžete upravit podle potřeby
+                    ValidateAudience = false, // Můžete upravit podle potřeby
+                    RequireExpirationTime = true,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero // Žádná tolerance pro časové odchylky
+                };
+
+                SecurityToken validatedToken;
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out validatedToken);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
         public static async Task RegisterNewDayOfUsingUs(string userId)
         {
             DateTime myDateTime = DateTime.Now;
