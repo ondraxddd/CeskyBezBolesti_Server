@@ -104,6 +104,75 @@ namespace CeskyBezBolesti_Server.Controllers
             return Ok();
         }
 
+        [HttpPost("addcategory")]
+        public async Task<ActionResult> AddCategory(CategoryAddDTO newCategory)
+        {
+            // check if jwt token is valid
+            string? token = HttpContext.Request.Cookies["jwtToken"];
+            if (token == null) return BadRequest("Jwt Token Not Found!");
+
+            if (!GeneralFunctions.IsJwtValid(token))
+            {
+                return BadRequest("Jwt token not valid!");
+            }
+
+            // check if he is admin
+            User user = await GeneralFunctions.GetUser(token);
+            if (user.Role != "admin")
+            {
+                return BadRequest("You must be admin!");
+            }
+
+            // TODO check if subject is unique
+
+            string command = $"INSERT INTO categories(subject_id, title) VALUES({newCategory.SubjectId},'{newCategory.CategoryName}')";
+            try
+            {
+                await db.RunNonQueryAsync(command);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Saving to db has failed.");
+            }
+            
+            return Ok();
+        }
+
+        [HttpPost("addsubcategory")]
+        public async Task<ActionResult> AddSubcategory(SubcategoryAddDTO newSubcategory)
+        {
+            // check if jwt token is valid
+            string? token = HttpContext.Request.Cookies["jwtToken"];
+            if (token == null) return BadRequest("Jwt Token Not Found!");
+
+            if (!GeneralFunctions.IsJwtValid(token))
+            {
+                return BadRequest("Jwt token not valid!");
+            }
+
+            // check if he is admin
+            User user = await GeneralFunctions.GetUser(token);
+            if (user.Role != "admin")
+            {
+                return BadRequest("You must be admin!");
+            }
+
+            // TODO check if subject is unique
+
+            string command = $"INSERT INTO subcategories(catg_id, desc) VALUES({newSubcategory.CategoryId}," +
+                $" '{newSubcategory}')";
+            try
+            {
+                await db.RunNonQueryAsync(command);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Saving to db has failed.");
+            }
+
+            return Ok();
+        }
+
         [HttpPost("addquestion")]
         public async Task<ActionResult> AddQuestion(QuestionAddDTO newQuestion)
         {
@@ -162,5 +231,6 @@ namespace CeskyBezBolesti_Server.Controllers
 
             return Ok();
         }
+
     }
 }
