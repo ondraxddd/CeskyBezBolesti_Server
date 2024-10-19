@@ -17,7 +17,6 @@ namespace CeskyBezBolesti_Server.Controllers
         [HttpPost("getset")]
         public async Task<ActionResult<string>> GetSet(QuestionRequestDto request)
         {
-            //string? token = HttpContext.Request.Cookies["jwtToken"];
             Question[] questions = new Question[limit];
             string command = $"SELECT * FROM question WHERE sub_catg_id = {request.SubCatgId}"
                    + $" ORDER BY RANDOM() LIMIT {limit}";
@@ -67,6 +66,126 @@ namespace CeskyBezBolesti_Server.Controllers
                 Questions = questions
             };
             return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet("getfouryearmix")]
+        public async Task<ActionResult<string>> getfouryearmix()
+        {
+            int countPraceSTextem = 1;
+            int countSlovniZasoba = 1;
+            int countGramatika = 1;
+            Question[] questions = new Question[3];
+
+            // get questions from Prace s Textem category
+            string command = "SELECT q.* " +
+                "FROM question q " +
+                "JOIN subcategories sc " +
+                "ON q.sub_catg_id = sc.id " +
+                "JOIN categories c ON " +
+                "sc.catg_id = c.id " +
+                "WHERE c.subject_id = 2 " +
+                "ORDER BY RANDOM() " +
+                $"LIMIT {countPraceSTextem};";
+
+            // get the questions
+            var reader = db.RunQuery(command);
+            int questIndex = 0;
+            foreach (var row in reader)
+            {
+                Question tempQuest = new Question()
+                {
+                    QuestionId = int.Parse(reader[0].ToString()!),
+                    SubCatgId = int.Parse(reader[1].ToString()!),
+                    QuestionText = reader[2].ToString()!
+                };
+                questions[questIndex] = tempQuest;
+                questIndex++;
+            }
+
+            // get questions from Slovni zasoba category
+            command = "SELECT q.* " +
+                "FROM question q " +
+                "JOIN subcategories sc " +
+                "ON q.sub_catg_id = sc.id " +
+                "JOIN categories c ON " +
+                "sc.catg_id = c.id " +
+                "WHERE c.subject_id = 3 " +
+                "ORDER BY RANDOM() " +
+                $"LIMIT {countSlovniZasoba};";
+
+            // get the questions
+            reader = db.RunQuery(command);
+            foreach (var row in reader)
+            {
+                Question tempQuest = new Question()
+                {
+                    QuestionId = int.Parse(reader[0].ToString()!),
+                    SubCatgId = int.Parse(reader[1].ToString()!),
+                    QuestionText = reader[2].ToString()!
+                };
+                questions[questIndex] = tempQuest;
+                questIndex++;
+            }
+
+            // get questions from Gramatika category
+            command = "SELECT q.* " +
+                "FROM question q " +
+                "JOIN subcategories sc " +
+                "ON q.sub_catg_id = sc.id " +
+                "JOIN categories c ON " +
+                "sc.catg_id = c.id " +
+                "WHERE c.subject_id = 1 " +
+                "ORDER BY RANDOM() " +
+                $"LIMIT {countGramatika};";
+
+            // get the questions
+            reader = db.RunQuery(command);
+            foreach (var row in reader)
+            {
+                Question tempQuest = new Question()
+                {
+                    QuestionId = int.Parse(reader[0].ToString()!),
+                    SubCatgId = int.Parse(reader[1].ToString()!),
+                    QuestionText = reader[2].ToString()!
+                };
+                questions[questIndex] = tempQuest;
+                questIndex++;
+            }
+
+            // get correct answer
+            for (int i = 0; i < questions.Count(); i++)
+            {
+                if (questions[i] is null) continue;
+                command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
+                    $" AND isCorrect == 1";
+                reader = db.RunQuery(command);
+                if (!reader.HasRows) continue;
+                reader.Read();
+                questions[i].CorrectAnswer = reader[0].ToString();
+            }
+
+            //get the false answer
+            for (int i = 0; i < questions.Count(); i++)
+            {
+                if (questions[i] is null) continue;
+                command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
+                    $" AND isCorrect == 0";
+                reader = db.RunQuery(command);
+                if (!reader.HasRows) continue;
+                reader.Read();
+                questions[i].FalseAnswer = reader[0].ToString();
+            }
+
+            reader.Close();
+            await reader.DisposeAsync();
+            QuestionResponseDto response = new QuestionResponseDto()
+            {
+                Questions = questions
+            };
+            return JsonConvert.SerializeObject(response);
+
+
+            return Ok();
         }
 
         [HttpPost("recordmistake")]
@@ -160,7 +279,7 @@ namespace CeskyBezBolesti_Server.Controllers
             // TODO check if subject is unique
 
             string command = $"INSERT INTO subcategories(catg_id, desc) VALUES({newSubcategory.CategoryId}," +
-                $" '{newSubcategory}')";
+                $" '{newSubcategory.SubcategoryName}')";
             try
             {
                 await db.RunNonQueryAsync(command);
@@ -210,11 +329,14 @@ namespace CeskyBezBolesti_Server.Controllers
             {
                 await reader.ReadAsync();
                 questId = int.Parse(reader["id"].ToString()!);
+                reader.Close();
+                await reader.DisposeAsync();
             }
             else
             {
                 return BadRequest("Addidng question has failed.");
             }
+            
 
             // save correct answer
             command = "INSERT INTO answers(quest_id, text, isCorrect)" +
