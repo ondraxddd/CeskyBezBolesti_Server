@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="CeskyBezBolesti_Server.Controllers.AuthController">
+    <Position X="4.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAMAAAAQgAAAIEACAAAAEAAAAAAAEAEQAAAAAAA=</HashCode>
+      <FileName>Controllers\AuthController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.Controllers.GeneralController">
+    <Position X="2.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAQAAAABAAAAAAAAAIAAAAACAEAAAAAAAA=</HashCode>
+      <FileName>Controllers\GeneralController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.Controllers.QuestionsController">
+    <Position X="2.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAQQAAAAAAACAAAUAAEAAEAAAAAABAAAAAA=</HashCode>
+      <FileName>Controllers\QuestionsController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.Controllers.UserStatsController">
+    <Position X="4.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>Controllers\UserStatsController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.Database.SqliteDbManager">
+    <Position X="7.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAAQAEAAAAgAAACAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Database\SqliteDbManager.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.CategoryAddDTO">
+    <Position X="15.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAEAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DTO\CategoryAddDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.FullSubjectsResponse">
+    <Position X="17" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAEAAAAAAAAAAAAAAEAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DTO\FullSubjectsResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.MixReportDTO">
+    <Position X="18.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>DTO\MixReportDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.QuestionAddDTO">
+    <Position X="20.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEAAAAAEAAA=</HashCode>
+      <FileName>DTO\QuestionAddDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.QuestionMixReportDTO">
+    <Position X="15.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>DTO\QuestionMixReportDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.QuestionRequestDto">
+    <Position X="17" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>DTO\QuestionRequestDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.QuestionResponseDto">
+    <Position X="18.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
+      <FileName>DTO\QuestionResponseDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.RecordAnswerDTO">
+    <Position X="20.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAgAAAA=</HashCode>
+      <FileName>DTO\RecordAnswerDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.RegisterUserDTO">
+    <Position X="15.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAACAAAAAAAQAAAAAAAAAAAAACAAAAAAAAAAg=</HashCode>
+      <FileName>DTO\RegisterUserDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.SaveSesionTimeDTO">
+    <Position X="17" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DTO\SaveSesionTimeDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.SubcategoryAddDTO">
+    <Position X="18.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DTO\SubcategoryAddDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.SubcategoryDTO">
+    <Position X="20.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAQAAAAAA=</HashCode>
+      <FileName>DTO\SubcategoryDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.UserDto">
+    <Position X="17" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACCEAAACAAAAAAEQAAAAAAAAAAAAACAAAAAAAAAAg=</HashCode>
+      <FileName>DTO\UserDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.DTO.UserFullStatsDTO">
+    <Position X="18.75" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAIAAAAAAAAAEAAAAAAAIQAAABA=</HashCode>
+      <FileName>DTO\UserFullStatsDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.Models.Category">
+    <Position X="10.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACABAAEAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAA=</HashCode>
+      <FileName>Models\Category.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.Models.Question">
+    <Position X="12.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAgAAACAAAAAAAAABAAAAAAAQEAAA=</HashCode>
+      <FileName>Models\Question.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.Models.Subcategory">
+    <Position X="10.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAA=</HashCode>
+      <FileName>Models\Subcategory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.Models.Subject">
+    <Position X="12.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Subject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CeskyBezBolesti_Server.Models.User">
+    <Position X="10.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACQEAAACAAAAAAEQAAAAAAEAAAAAAAAQAAAAAAAAg=</HashCode>
+      <FileName>Models\User.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="CeskyBezBolesti_Server.Database.IDatabaseManager">
+    <Position X="7.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAQAAAAAAgAAACAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Database\IDatabaseManager.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

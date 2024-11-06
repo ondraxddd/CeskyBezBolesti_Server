@@ -41,7 +41,7 @@ namespace CeskyBezBolesti_Server.Controllers
             {
                 if (questions[i] is null) continue;
                 command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
-                    $" AND isCorrect == 1";
+                    $" AND IsCorrect == 1";
                 reader = db.RunQuery(command);
                 if (!reader.HasRows) continue;
                 reader.Read();
@@ -53,7 +53,7 @@ namespace CeskyBezBolesti_Server.Controllers
             {
                 if (questions[i] is null) continue;
                 command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
-                    $" AND isCorrect == 0";
+                    $" AND IsCorrect == 0";
                 reader = db.RunQuery(command);
                 if (!reader.HasRows) continue;
                 reader.Read();
@@ -69,7 +69,7 @@ namespace CeskyBezBolesti_Server.Controllers
         }
 
         [HttpGet("getfouryearmix")]
-        public async Task<ActionResult<string>> getfouryearmix()
+        public async Task<ActionResult<string>> Getfouryearmix()
         {
             int countPraceSTextem = 1;
             int countSlovniZasoba = 1;
@@ -157,7 +157,7 @@ namespace CeskyBezBolesti_Server.Controllers
             {
                 if (questions[i] is null) continue;
                 command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
-                    $" AND isCorrect == 1";
+                    $" AND IsCorrect == 1";
                 reader = db.RunQuery(command);
                 if (!reader.HasRows) continue;
                 reader.Read();
@@ -169,7 +169,7 @@ namespace CeskyBezBolesti_Server.Controllers
             {
                 if (questions[i] is null) continue;
                 command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
-                    $" AND isCorrect == 0";
+                    $" AND IsCorrect == 0";
                 reader = db.RunQuery(command);
                 if (!reader.HasRows) continue;
                 reader.Read();
@@ -182,9 +182,36 @@ namespace CeskyBezBolesti_Server.Controllers
             {
                 Questions = questions
             };
-            return JsonConvert.SerializeObject(response);
+            return Ok(JsonConvert.SerializeObject(response));
+        }
 
+        [HttpPost("reportmixresult")]
+        public async Task<ActionResult> ReportMixResult(MixReportDTO report)
+        {
+            string? token = HttpContext.Request.Cookies["jwtToken"];
+            if (token == null) return BadRequest("Jwt Token Not Found!");
+            User user = await GeneralFunctions.GetUser(token);
 
+            // save report
+            string command;
+            DateTime currentDateTime = DateTime.Now;
+            string formattedDateTime = currentDateTime.ToString("yyyy-MM-dd HH:mm:ss");
+            command = $"INSERT INTO mix_reports(user_id, date) VALUES({user.Id},'{formattedDateTime}')";
+            await db.RunNonQueryAsync(command);
+            int newReportId;
+            command = "SELECT last_insert_rowid();"; // TODO udělat to bezpečněji, zprovoznit returning
+            var reader = db.RunQuery(command);
+            if(!reader.HasRows) return BadRequest("Při ukladani došlo k neočekavane chybe.");
+            reader.Read();
+            newReportId = int.Parse(reader[0].ToString()!);
+
+            // save answers
+            foreach (var answer in report.Answers)
+            {
+                command = $"INSERT INTO mix_answers(mix_report_id, question_id, is_correct) " +
+                    $"VALUES({newReportId}, {answer.QuestId}, {answer.IsCorrect})";
+                await db.RunNonQueryAsync(command);
+            }
             return Ok();
         }
 
@@ -339,14 +366,14 @@ namespace CeskyBezBolesti_Server.Controllers
             
 
             // save correct answer
-            command = "INSERT INTO answers(quest_id, text, isCorrect)" +
+            command = "INSERT INTO answers(quest_id, text, IsCorrect)" +
                 $"VALUES({questId}, '{newQuestion!.Answers![0]}', 1)";
             await db.RunNonQueryAsync(command);
 
             // save all the wrong ones
             for(int i = 1; i < newQuestion.Answers.Length; i++)
             {
-                command = "INSERT INTO answers(quest_id, text, isCorrect)" +
+                command = "INSERT INTO answers(quest_id, text, IsCorrect)" +
                 $"VALUES({questId}, '{newQuestion!.Answers![i]}', 0)";
                 await db.RunNonQueryAsync(command);
             }

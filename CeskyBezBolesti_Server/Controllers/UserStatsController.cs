@@ -136,7 +136,7 @@ namespace CeskyBezBolesti_Server.Controllers
                 "JOIN " +
                 "question q ON ra.quest_id = q.id " +
                 "JOIN " +
-                "answers a ON q.id = a.quest_id AND a.isCorrect = 1 " +
+                "answers a ON q.id = a.quest_id AND a.IsCorrect = 1 " +
                 "WHERE " +
                 $"ra.user_id = {user.Id} AND ra.wasCorrect = 0 " +
                 "ORDER BY ra.count DESC " +
