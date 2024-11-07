@@ -1,5 +1,6 @@
 ﻿using CeskyBezBolesti_Server.Database;
 using CeskyBezBolesti_Server.DTO;
+using CeskyBezBolesti_Server.Emailing;
 using CeskyBezBolesti_Server.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -9,8 +10,10 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections;
+using System.Data;
 using System.Data.SQLite;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
@@ -22,6 +25,8 @@ namespace CeskyBezBolesti_Server.Controllers
     {
         private readonly IConfiguration _configuration;
         IDatabaseManager db = MyContainer.GetDbManager();
+        IEmailSender emailSender = MyContainer.GetEmailSender();
+
 
         public AuthController(IConfiguration configuration)
         {
@@ -43,6 +48,8 @@ namespace CeskyBezBolesti_Server.Controllers
             string saveUserCommand = "INSERT INTO users(username, last_name, first_name, email, password_hash, password_salt, created_at) " +
                 $" VALUES('{req.Username}', '{req.LastName}', '{req.FirstName}', '{req.Email}', '{Convert.ToBase64String(passwordHash)}', '{Convert.ToBase64String(passwordSalt)}', '{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}')";
             db.RunNonQuery(saveUserCommand);
+            emailSender.SendEmail(new MailAddress(req.Email), "Potvrzení registrace",
+                "Tímto potvrzujeme vaši úspěšnou registrace na stránkách ceskybezbolesti.com");
 
             // Get id of new user
             string getIdCommand = $"SELECT id FROM users WHERE email='{req.Email}' AND username='{req.Username}'";
@@ -79,6 +86,16 @@ namespace CeskyBezBolesti_Server.Controllers
             result.Read();
             string dbHash = (string)result["password_hash"];
             string dbSalt = (string)result["password_salt"];
+            var role = result["role"];
+            string userRole;
+            if(role is System.DBNull)
+            {
+                userRole = "student";
+            }
+            else
+            {
+                userRole = role.ToString()!;
+            }
             User tempUser = new User()
             {
                 Id = result["id"].ToString()!,
@@ -86,8 +103,7 @@ namespace CeskyBezBolesti_Server.Controllers
                 LastName = (string)result["last_name"],
                 Username = (string)result["username"],
                 Email = (string)result["email"],
-                Role = (string)result["role"]
-
+                Role = userRole
             };
             result.Close();
             await result.DisposeAsync();
