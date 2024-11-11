@@ -121,6 +121,69 @@ namespace CeskyBezBolesti_Server.Controllers
             return Ok(JsonConvert.SerializeObject(token));
         }
 
+        [HttpPost("resetpassword")]
+        public async Task<ActionResult> ResetPassword(ResetPasswordRequestDTO req)
+        {
+            // Check if user exists
+            string query = $"SELECT id, email FROM users WHERE email = '{req.Email}'";
+            var result = db.RunQuery(query);
+            if (!result.HasRows)
+            {
+                return BadRequest("User does not exist.");
+            }
+
+            result.Read();
+            string userId = result["id"].ToString()!;
+            string userEmail = result["email"].ToString()!;
+
+            // Generate a secure random reset token
+            string resetToken = GenerateResetToken();
+            DateTime createdAt = DateTime.Now;
+            DateTime experationAt = DateTime.UtcNow.AddMinutes(15); // Token valid for 1 hour
+
+            // Save the reset token and expiration to the database
+            string command = $"INSERT INTO reset_password_tokens(user_id,token,was_used, expires_at,created_at) " +
+                $"VALUES({userId},'{resetToken}',0,'{experationAt:yyyy-MM-dd HH:mm:ss}', '{createdAt:yyyy-MM-dd HH:mm:ss}')";
+            db.RunNonQuery(command);
+
+            // Send reset link to user's email
+            string resetLink = $"https://ceskybezbolesti.cz/resetpassword/{resetToken}";
+            string emailBody = $"Klikněte na následující odkaz pro obnovení hesla: {resetLink}. Tento odkaz je platný pouze 15 minut.";
+           // emailSender.SendEmail(new MailAddress(userEmail), "Obnovení hesla", emailBody);
+
+            return Ok("Reset link has been sent to your email.");
+        }
+
+        [HttpPost("updatepassword")]
+        public async Task<ActionResult> UpdatePassword(UpdatePasswordRequestDTO req)
+        {
+            // check if reset token is valid
+            if (!VerifyResetPasswordToken(req.Token))
+                return BadRequest("Reset token is invalid");
+
+            // get user id
+            string command = $"SELECT user_id FROM reset_password_tokens WHERE token = '{req.Token}'";
+            var reader = db.RunQuery(command);
+            if (!reader.HasRows)
+                return BadRequest("An unexpected error has occured.");
+            reader.Read();
+            int userId = int.Parse(reader["user_id"].ToString()!);
+
+            // generate new password hash and update 
+            CreatePasswordHash(req.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+
+            // update users password in db
+            command = $"UPDATE users SET password_hash = '{Convert.ToBase64String(passwordHash)}', password_salt = '{Convert.ToBase64String(passwordSalt)}' " +
+                $"WHERE id = {userId}";
+            db.RunNonQuery(command);
+
+            // flag reset token as used
+            command = $"UPDATE reset_password_tokens SET was_used=1 WHERE token = '{req.Token}'";
+            db.RunNonQuery(command);
+
+            return Ok();
+        }
+
         [HttpPost("verifyjwttoken")]
         public async Task<ActionResult<string>> VerifyJwtToken(string token)
         {
@@ -245,6 +308,41 @@ namespace CeskyBezBolesti_Server.Controllers
                 return newHash == oldHash;
                 // return computedHash.Equals(storedHash); - proč porovnávání bytes nefunguje???
             }
+        }
+
+        private string GenerateResetToken()
+        {
+            var tokenBytes = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(tokenBytes);
+            }
+            return Convert.ToBase64String(tokenBytes).Replace("+", "").Replace("/", "").Replace("=", ""); // Remove URL-unsafe chars
+        }
+
+        private bool VerifyResetPasswordToken(string token)
+        {
+            //Check if token exists and is still valid - gotta edit the database command
+            string query = $"SELECT id, expires_at, was_used FROM reset_password_tokens WHERE token = '{token}'";
+            var result = db.RunQuery(query);
+
+            if (!result.HasRows)
+            {
+                return false;
+            }
+
+            result.Read();
+            DateTime tokenExpiration = DateTime.Parse(result["expires_at"].ToString()!);
+            bool wasUsed = bool.Parse(result["was_used"].ToString()!);
+
+            // Check if the token has expired
+            if (DateTime.UtcNow > tokenExpiration || wasUsed)
+            {
+                return false;
+            }
+
+            return true;
+
         }
     }
 }
