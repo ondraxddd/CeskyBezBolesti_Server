@@ -149,7 +149,7 @@ namespace CeskyBezBolesti_Server.Controllers
             // Send reset link to user's email
             string resetLink = $"https://ceskybezbolesti.cz/resetpassword/{resetToken}";
             string emailBody = $"Klikněte na následující odkaz pro obnovení hesla: {resetLink}. Tento odkaz je platný pouze 15 minut.";
-           // emailSender.SendEmail(new MailAddress(userEmail), "Obnovení hesla", emailBody);
+            emailSender.SendEmail(new MailAddress(userEmail), "Obnovení hesla", emailBody);
 
             return Ok("Reset link has been sent to your email.");
         }
