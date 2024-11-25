@@ -121,6 +121,23 @@ namespace CeskyBezBolesti_Server.Controllers
             return Ok(JsonConvert.SerializeObject(token));
         }
 
+        [HttpGet("logout")]
+        public async Task<ActionResult<string>> Logout()
+        {
+            string? token = HttpContext.Request.Cookies["jwtToken"];
+            if (token == null) return Ok();
+
+            Response.Cookies.Append("jwtToken", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(-1), // set expiration to past
+                Secure = true,
+                SameSite = SameSiteMode.None 
+            });
+
+            return Ok(new { message = "Odhlášení bylo úspěšné." });
+        }
+
         [HttpPost("resetpassword")]
         public async Task<ActionResult> ResetPassword(ResetPasswordRequestDTO req)
         {
