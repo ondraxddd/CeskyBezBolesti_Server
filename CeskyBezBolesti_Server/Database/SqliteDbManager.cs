@@ -3,21 +3,30 @@ using System.Data.SQLite;
 
 namespace CeskyBezBolesti_Server.Database
 {
-    public class SqliteDbManager :IDatabaseManager
-    {   
-        private string _dbConn =string.Empty;
+    public class SqliteDbManager : IDatabaseManager
+    {
+        private string _dbConn = string.Empty;
         private SQLiteConnection _mydatabase;
-        public SqliteDbManager(string conn) {
+        public SqliteDbManager(string conn)
+        {
             _dbConn = conn;
-            _mydatabase= new SQLiteConnection(conn);
-            _mydatabase.Open();          
+            _mydatabase = new SQLiteConnection(conn);
+            _mydatabase.Open();
         }
 
         public void RunNonQuery(string sql)
         {
-            using(SQLiteCommand cmd = new SQLiteCommand(sql, _mydatabase)) 
+            // params (string Name, object Value)[] test - Patrik ukázka TODO
+            using (SQLiteCommand cmd = new SQLiteCommand(sql, _mydatabase))
             {
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
         }
 
@@ -46,13 +55,13 @@ namespace CeskyBezBolesti_Server.Database
 
         public SQLiteDataReader RunQuery(string sql)
         {
-            using(SQLiteCommand cmd = new SQLiteCommand(sql, _mydatabase))
+            using (SQLiteCommand cmd = new SQLiteCommand(sql, _mydatabase))
             {
                 SQLiteDataReader reader = cmd.ExecuteReader();
-                
 
-                    return reader;
-                
+
+                return reader;
+
             }
         }
         public async Task<SQLiteDataReader> RunQueryAsync(string sql)

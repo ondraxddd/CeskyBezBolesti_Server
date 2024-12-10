@@ -381,5 +381,24 @@ namespace CeskyBezBolesti_Server.Controllers
             return Ok();
         }
 
+        [HttpPost("getallquestions")]
+        public async Task<ActionResult> GetAllQuestions(AllQuestsRequestDTO req)
+        {
+            List<Question> questions = new List<Question>();
+            string command = $"SELECT * FROM question WHERE sub_catg_id = {req.subCatgId}";
+            var reader = db.RunQuery(command);
+            foreach (var row in reader)
+            {
+                Question tempQuest = new Question()
+                {
+                    QuestionId = int.Parse(reader[0].ToString()!),
+                    SubCatgId = int.Parse(reader[1].ToString()!),
+                    QuestionText = reader[2].ToString()!
+                };
+                questions.Add(tempQuest);
+            }
+            return Ok(questions);
+        }
+
     }
 }
