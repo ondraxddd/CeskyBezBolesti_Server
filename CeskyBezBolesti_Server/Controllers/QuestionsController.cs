@@ -12,7 +12,7 @@ namespace CeskyBezBolesti_Server.Controllers
     public class QuestionsController : ControllerBase
     {
         IDatabaseManager db = MyContainer.GetDbManager();
-        int limit = 8;
+        int limit = 4; // až bude více otázek v každé kategorii tak se může zvýšit
 
         [HttpPost("getset")]
         public async Task<ActionResult<string>> GetSet(QuestionRequestDto request)
@@ -398,6 +398,15 @@ namespace CeskyBezBolesti_Server.Controllers
                 questions.Add(tempQuest);
             }
             return Ok(questions);
+        }
+
+        [HttpPost("removequestion")]
+        public async Task<ActionResult> RemoveQuestion(RemoveQuestionDTO req)
+        {
+            // remove question - all references are ON CASCADE DELETE so nothing else is needed
+            string command = $"DELETE FROM question WHERE id ={req.QuestId}";
+            db.RunNonQuery(command);
+            return Ok();
         }
 
     }
