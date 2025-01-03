@@ -361,7 +361,7 @@ namespace CeskyBezBolesti_Server.Controllers
             }
             else
             {
-                return BadRequest("Addidng question has failed.");
+                return BadRequest("Adding question has failed.");
             }
             
 
