@@ -7,5 +7,8 @@ namespace CeskyBezBolesti_Server.DTO
         public int Id { get; set; }
         public string Title { get; set; }
         public List<Category> Categories { get; set; }
+        public int FreeQuestionsCount { get; set; }
+        public int PaidQuestionsCount { get; set; }
+
     }
 }

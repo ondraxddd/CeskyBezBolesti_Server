@@ -122,6 +122,34 @@ namespace CeskyBezBolesti_Server.Controllers
                     Id = int.Parse(reader["id"].ToString()!),
                     Title = reader["title"].ToString()!,
                 };
+
+                // get count of free and paid questions
+                string commandCounts = @"SELECT 
+    s.id, 
+    s.title,
+    COUNT(CASE WHEN q.subscription = 0 THEN 1 END) AS FreeQuestionsCount,
+    COUNT(CASE WHEN q.subscription > 0 THEN 1 END) AS PaidQuestionsCount
+FROM 
+    Subjects s
+JOIN 
+    categories c ON c.subject_id = s.id
+JOIN 
+    subcategories sc ON sc.catg_id = c.id
+JOIN 
+    question q ON q.sub_catg_id = sc.id
+WHERE " +
+$" s.id = {tempSub.Id} " +
+"GROUP BY " +
+    "s.id, s.title;";
+                var readerCounts = db.RunQuery(commandCounts);
+                if (readerCounts.HasRows)
+                {
+                    readerCounts.Read();
+                    tempSub.FreeQuestionsCount = int.Parse(readerCounts["FreeQuestionsCount"].ToString()!);
+                    tempSub.PaidQuestionsCount = int.Parse(readerCounts["PaidQuestionsCount"].ToString()!);
+                }
+                readerCounts.Close();
+                await readerCounts.DisposeAsync();
                 subjects.Add(tempSub);
             }
 
