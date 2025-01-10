@@ -138,9 +138,9 @@ JOIN
 JOIN 
     question q ON q.sub_catg_id = sc.id
 WHERE " +
-$" s.id = {tempSub.Id} " +
-"GROUP BY " +
-    "s.id, s.title;";
+                $" s.id = {tempSub.Id} " +
+                "GROUP BY " +
+                "s.id, s.title;";
                 var readerCounts = db.RunQuery(commandCounts);
                 if (readerCounts.HasRows)
                 {

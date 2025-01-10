@@ -171,7 +171,7 @@ namespace CeskyBezBolesti_Server.Controllers
             return Ok("Reset link has been sent to your email.");
         }
 
-        [HttpPost("updatepassword")]
+        [HttpPost("updatepassword")] // used to update password from reset link; --->>>> token != JwtToken  <<<<----; token == reset token
         public async Task<ActionResult> UpdatePassword(UpdatePasswordRequestDTO req)
         {
             // check if reset token is valid
@@ -198,6 +198,39 @@ namespace CeskyBezBolesti_Server.Controllers
             command = $"UPDATE reset_password_tokens SET was_used=1 WHERE token = '{req.Token}'";
             db.RunNonQuery(command);
 
+            return Ok();
+        }
+
+        [HttpPost("changepassword")] // used when user wants to change password from setting page in logged in mode
+        public async Task<ActionResult> ChangePassword(ChangePasswordDTO req)
+        {
+            string? token = HttpContext.Request.Cookies["jwtToken"];
+            if (token == null) return BadRequest("Jwt Token Not Found!");
+            if (!GeneralFunctions.IsJwtValid(token)) return BadRequest("Invalid JWT token.");
+            User user = await GeneralFunctions.GetUser(token);
+
+            var reader = db.RunQuery($"SELECT password_hash, password_salt FROM users WHERE id = {user.Id};");
+            if (!reader.HasRows)
+                return BadRequest(JsonConvert.SerializeObject("User doesnt exists!"));
+
+            reader.Read();
+            string dbHash = (string)reader["password_hash"];
+            string dbSalt = (string)reader["password_salt"];
+
+            // Verify old password
+            bool isPasswordCorrect = VerifyPassword(req.OldPassword, Convert.FromBase64String(dbHash), Convert.FromBase64String(dbSalt));
+            if (!isPasswordCorrect) return BadRequest(JsonConvert.SerializeObject("Wrong password!"));
+
+            // generate new password hash
+            CreatePasswordHash(req.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+
+            // update users password in db
+            string command = $"UPDATE users SET password_hash = '{Convert.ToBase64String(passwordHash)}', password_salt = '{Convert.ToBase64String(passwordSalt)}' " +
+                $"WHERE id = {user.Id} ;";
+            db.RunNonQuery(command);
+
+            await reader.CloseAsync();
+            await reader.DisposeAsync();
             return Ok();
         }
 

@@ -190,6 +190,7 @@ namespace CeskyBezBolesti_Server.Controllers
         {
             string? token = HttpContext.Request.Cookies["jwtToken"];
             if (token == null) return BadRequest("Jwt Token Not Found!");
+            if (!GeneralFunctions.IsJwtValid(token)) return BadRequest("Invalid JWT token.");
             User user = await GeneralFunctions.GetUser(token);
 
             // save report
@@ -220,6 +221,7 @@ namespace CeskyBezBolesti_Server.Controllers
         {
             string? token = HttpContext.Request.Cookies["jwtToken"];
             if (token == null) return BadRequest("Jwt Token Not Found!");
+            if (!GeneralFunctions.IsJwtValid(token)) return BadRequest("Invalid JWT token.");
             User user = await GeneralFunctions.GetUser(token);
 
             //record to db
@@ -403,6 +405,15 @@ namespace CeskyBezBolesti_Server.Controllers
         [HttpPost("removequestion")]
         public async Task<ActionResult> RemoveQuestion(RemoveQuestionDTO req)
         {
+            // check if jwt token is valid
+            string? token = HttpContext.Request.Cookies["jwtToken"];
+            if (token == null) return BadRequest("Jwt Token Not Found!");
+
+            if (!GeneralFunctions.IsJwtValid(token))
+            {
+                return BadRequest("Jwt token not valid!");
+            }
+
             // remove question - all references are ON CASCADE DELETE so nothing else is needed
             string command = $"DELETE FROM question WHERE id ={req.QuestId}";
             db.RunNonQuery(command);
