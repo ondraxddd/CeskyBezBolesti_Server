@@ -234,6 +234,34 @@ namespace CeskyBezBolesti_Server.Controllers
             return Ok();
         }
 
+        [HttpDelete("deleteaccount")]
+        public async Task<ActionResult> DeleteAccount()
+        {
+            string? token = HttpContext.Request.Cookies["jwtToken"];
+            if (token == null) return BadRequest("Jwt Token Not Found!");
+            if (!GeneralFunctions.IsJwtValid(token)) return BadRequest("Invalid JWT token.");
+            User user = await GeneralFunctions.GetUser(token);
+
+            // check if user exists
+            var reader = db.RunQuery($"SELECT * FROM users WHERE id = {user.Id}");
+            if (!reader.HasRows) return BadRequest("User doesnt exist!");
+
+            // delete account
+            string command = $"DELETE FROM users WHERE id = {user.Id}";
+            await db.RunNonQueryAsync(command);
+
+            // return expired cookie ( = logout)
+            Response.Cookies.Append("jwtToken", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(-1), // set expiration to past
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
+
+            return Ok();
+        }
+
         [HttpPost("verifyjwttoken")]
         public async Task<ActionResult<string>> VerifyJwtToken(string token)
         {
