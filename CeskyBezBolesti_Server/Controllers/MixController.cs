@@ -40,7 +40,14 @@ namespace CeskyBezBolesti_Server.Controllers
                 OneMixReportOverview tempReport = new OneMixReportOverview();
                 tempReport.Id = int.Parse(reader["id"].ToString()!);
                 string sqlDateTime = reader["date"].ToString()!;
-                tempReport.DateTime = DateTime.ParseExact(sqlDateTime, "M/d/yyyy h:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
+                if (DateTime.TryParseExact(sqlDateTime, "dd.MM.yyyy H:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsedDate))
+                {
+                    tempReport.DateTime = parsedDate;
+                }
+                else
+                {
+                    //throw new FormatException($"Neplatný formát datumu: {sqlDateTime}");
+                }
                 reports.Add(tempReport);
             }
             reader.Close();
@@ -66,7 +73,15 @@ namespace CeskyBezBolesti_Server.Controllers
             // Get report date
             reader.Read();
             string sqlDateTime = reader["date"].ToString()!;
-            DateTime reportDate = DateTime.ParseExact(sqlDateTime, "M/d/yyyy h:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime reportDate = DateTime.MinValue;
+            if (DateTime.TryParseExact(sqlDateTime, "dd.MM.yyyy H:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsedDate))
+            {
+                reportDate = parsedDate;
+            }
+            else
+            {
+                //throw new FormatException($"Neplatný formát datumu: {sqlDateTime}");
+            }
             reader.Close();
             await reader.DisposeAsync();
 
