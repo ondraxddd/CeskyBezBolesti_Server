@@ -18,11 +18,15 @@ namespace CeskyBezBolesti_Server.Controllers
         public async Task<ActionResult<string>> GetSet(QuestionRequestDto request)
         {
             Question[] questions = new Question[limit];
-            string command = $"SELECT * FROM question WHERE sub_catg_id = {request.SubCatgId}"
+            string command = $"SELECT * FROM question WHERE sub_catg_id = @subCatgId"
                    + $" ORDER BY RANDOM() LIMIT {limit}";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@subCatgId", request.SubCatgId },
+            };
 
             // get the questions
-            var reader = db.RunQuery(command);
+            var reader = db.RunQuery(command, parameters);
             int questIndex = 0;
             foreach (var row in reader)
             {
@@ -37,12 +41,17 @@ namespace CeskyBezBolesti_Server.Controllers
             }
 
             // get correct answer
-            for(int i = 0; i < questions.Count(); i++)
+            for (int i = 0; i < questions.Count(); i++)
             {
                 if (questions[i] is null) continue;
-                command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
+                command = $"SELECT text FROM answers WHERE quest_id = @quest_id" +
                     $" AND IsCorrect == 1";
-                reader = db.RunQuery(command);
+                parameters = new Dictionary<string, object>
+                {
+                    { "@quest_id", questions[i].QuestionId },
+                };
+
+                reader = db.RunQuery(command, parameters);
                 if (!reader.HasRows) continue;
                 reader.Read();
                 questions[i].CorrectAnswer = reader[0].ToString();
@@ -52,9 +61,14 @@ namespace CeskyBezBolesti_Server.Controllers
             for (int i = 0; i < questions.Count(); i++)
             {
                 if (questions[i] is null) continue;
-                command = $"SELECT text FROM answers WHERE quest_id = {questions[i].QuestionId}" +
+                command = $"SELECT text FROM answers WHERE quest_id = @quest_id" +
                     $" AND IsCorrect == 0";
-                reader = db.RunQuery(command);
+                parameters = new Dictionary<string, object>
+                {
+                    { "@quest_id", questions[i].QuestionId },
+                };
+
+                reader = db.RunQuery(command, parameters);
                 if (!reader.HasRows) continue;
                 reader.Read();
                 questions[i].FalseAnswer = reader[0].ToString();
@@ -62,7 +76,8 @@ namespace CeskyBezBolesti_Server.Controllers
 
             reader.Close();
             await reader.DisposeAsync();
-            QuestionResponseDto response = new QuestionResponseDto() {
+            QuestionResponseDto response = new QuestionResponseDto()
+            {
                 Questions = questions
             };
             return JsonConvert.SerializeObject(response);
@@ -202,7 +217,7 @@ namespace CeskyBezBolesti_Server.Controllers
             int newReportId;
             command = "SELECT last_insert_rowid();"; // TODO udělat to bezpečněji, zprovoznit returning
             var reader = db.RunQuery(command);
-            if(!reader.HasRows) return BadRequest("Při ukladani došlo k neočekavane chybe.");
+            if (!reader.HasRows) return BadRequest("Při ukladani došlo k neočekavane chybe.");
             reader.Read();
             newReportId = int.Parse(reader[0].ToString()!);
 
@@ -230,7 +245,7 @@ namespace CeskyBezBolesti_Server.Controllers
             var reader = db.RunQuery(command);
             int count = 1;
             //has atleast once answered
-            if(reader.HasRows)
+            if (reader.HasRows)
             {
                 reader.Read();
                 count = int.Parse(reader["count"].ToString()!);
@@ -282,7 +297,7 @@ namespace CeskyBezBolesti_Server.Controllers
             {
                 return BadRequest("Saving to db has failed.");
             }
-            
+
             return Ok();
         }
 
@@ -365,7 +380,7 @@ namespace CeskyBezBolesti_Server.Controllers
             {
                 return BadRequest("Adding question has failed.");
             }
-            
+
 
             // save correct answer
             command = "INSERT INTO answers(quest_id, text, IsCorrect)" +
@@ -373,7 +388,7 @@ namespace CeskyBezBolesti_Server.Controllers
             await db.RunNonQueryAsync(command);
 
             // save all the wrong ones
-            for(int i = 1; i < newQuestion.Answers.Length; i++)
+            for (int i = 1; i < newQuestion.Answers.Length; i++)
             {
                 command = "INSERT INTO answers(quest_id, text, IsCorrect)" +
                 $"VALUES({questId}, '{newQuestion!.Answers![i]}', 0)";

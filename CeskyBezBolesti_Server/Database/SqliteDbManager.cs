@@ -14,11 +14,18 @@ namespace CeskyBezBolesti_Server.Database
             _mydatabase.Open();
         }
 
-        public void RunNonQuery(string sql)
+        public void RunNonQuery(string sql, Dictionary<string, object>? parameters = null)
         {
-            // params (string Name, object Value)[] test - Patrik ukázka TODO
             using (SQLiteCommand cmd = new SQLiteCommand(sql, _mydatabase))
             {
+                if (parameters != null)
+                {
+                    foreach (var param in parameters)
+                    {
+                        cmd.Parameters.Add(new SQLiteParameter(param.Key, param.Value));
+                    }
+                }
+
                 try
                 {
                     cmd.ExecuteNonQuery();
@@ -30,33 +37,34 @@ namespace CeskyBezBolesti_Server.Database
             }
         }
 
-        public async Task RunNonQueryAsync(string sql)
+        public async Task RunNonQueryAsync(string sql, Dictionary<string, object>? parameters = null)
         {
             using (SQLiteCommand cmd = new SQLiteCommand(sql, _mydatabase))
             {
+                if (parameters != null)
+                {
+                    foreach (var param in parameters)
+                    {
+                        cmd.Parameters.Add(new SQLiteParameter(param.Key, param.Value));
+                    }
+                }
+
                 await cmd.ExecuteNonQueryAsync();
             }
         }
-        /*
-         * SqlDataReader reader = command.ExecuteReader();
 
-        while (reader.HasRows)
-        {
-            Console.WriteLine("\t{0}\t{1}", reader.GetName(0),
-                reader.GetName(1));
-
-            while (reader.Read())
-            {
-                Console.WriteLine("\t{0}\t{1}", reader.GetInt32(0),
-                    reader.GetString(1));
-            }
-            reader.NextResult();
-        }*/
-
-        public SQLiteDataReader RunQuery(string sql)
+        public SQLiteDataReader RunQuery(string sql, Dictionary<string, object>? parameters = null)
         {
             using (SQLiteCommand cmd = new SQLiteCommand(sql, _mydatabase))
             {
+
+                if (parameters != null)
+                {
+                    foreach (var param in parameters)
+                    {
+                        cmd.Parameters.Add(new SQLiteParameter(param.Key, param.Value));
+                    }
+                }
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
 
@@ -64,7 +72,7 @@ namespace CeskyBezBolesti_Server.Database
 
             }
         }
-        public async Task<SQLiteDataReader> RunQueryAsync(string sql)
+        public async Task<SQLiteDataReader> RunQueryAsync(string sql, Dictionary<string, object>? parameters = null)
         {
             throw new NotImplementedException("Není podporováno knihovnou...");
             using (SQLiteCommand cmd = new SQLiteCommand(sql, _mydatabase))
