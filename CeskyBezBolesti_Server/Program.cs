@@ -19,11 +19,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "default", policy =>
     {
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        //policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); DEV ONLY
+        policy.WithOrigins("https://ceskybezbolesti.vercel.app/", "https://ceskybezbolesti.com/", "https://ceskybezbolesti.cz/");
     });
 });
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
