@@ -337,10 +337,11 @@ namespace CeskyBezBolesti_Server.Controllers
         }
 
         [HttpGet("/ping")]
-        public void Ping()
+        public string Ping()
         {
-            Response.Headers.SetCookie = "jwtToken=ahoj; httpOnly=true; secure; samesite=none; path=/";
+            //Response.Headers.SetCookie = "jwtToken=ahoj; httpOnly=true; secure; samesite=none; path=/";
             Response.StatusCode = 200;
+            return ("CORS debuggings");
         }
 
         private string CreateToken(User user)
