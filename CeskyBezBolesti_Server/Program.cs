@@ -20,12 +20,15 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "default", policy =>
     {
         //policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); DEV ONLY
-        policy.WithOrigins("https://ceskybezbolesti.vercel.app", "https://ceskybezbolesti.com", "https://ceskybezbolesti.cz").AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
+        policy.WithOrigins("https://ceskybezbolesti.vercel.app", "https://ceskybezbolesti.com", "https://ceskybezbolesti.cz")
+        .AllowAnyHeader()
+        .AllowCredentials()
+        .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
-
+app.UseCors("default");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -34,12 +37,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-
 app.UseHttpsRedirection();
-
-app.UseCors("default");
-
 
 app.UseAuthorization();
 
